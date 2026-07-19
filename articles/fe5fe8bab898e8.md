@@ -185,9 +185,9 @@ Error: Invalid input.
 ```
 
 ### ExitCode
-また、`ExitCode`に定義された静的プロパティをthrowすることで、その時点でコマンドを終了させることができます。
+また`ExitCode`に定義された静的プロパティをthrowすることで、その時点でコマンドを終了させることもできます。
 
-中でも`ExitCode.validationFailure`はthrowすることで、プラットフォームごとに適した終了コードを投げるように実装されています。
+中でも`ExitCode.validationFailure`は、プラットフォームごとに適した終了コードを投げるように実装されています。
 
 ```swift
 throw ExitCode.success
@@ -201,7 +201,7 @@ throw ExitCode.validationFailure
 throw ExitCode(5)
 ```
 
-また、`CleanExit`というものもあり、エラー扱いではなくかつメッセージを表示して終了させたい。という場面で扱えます。
+加えて`CleanExit`というものもあり、エラー扱いではなくかつメッセージを表示して正常終了させたい。という場面で扱えます。
 ヘルプを表示して抜けたい、バージョンを表示したいなどの際に活用できます。
 ```swift
 // 任意のParsableCommandのヘルプを表示して正常終了
