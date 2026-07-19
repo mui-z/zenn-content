@@ -1,9 +1,9 @@
 ---
-title: "swift-argument-parserでCLIコマンドを作ってみよう！"
+title: "swift-argument-parserでCLIツールを作ってみよう！"
 emoji: "🍎"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["swift", "cli", "apple"]
-published: false
+published: true
 ---
 
 ## はじめに
