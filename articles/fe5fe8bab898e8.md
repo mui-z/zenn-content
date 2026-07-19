@@ -188,7 +188,6 @@ Error: Invalid input.
 また、`ExitCode`に定義された静的プロパティをthrowすることで、その時点でコマンドを終了させることができます。
 
 中でも`ExitCode.validationFailure`はthrowすることで、プラットフォームごとに適した終了コードを投げるように実装されています。
-（[ソース](https://github.com/apple/swift-argument-parser/blob/6a52f3251125d74daf04fcbd5e6f08a75d074382/Sources/ArgumentParser/Utilities/Platform.swift#L143-L164)を見る限りは、Windows, WASI, それ以外で振り分けていそう)
 
 ```swift
 throw ExitCode.success
