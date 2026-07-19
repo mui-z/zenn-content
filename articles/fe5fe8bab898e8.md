@@ -184,7 +184,7 @@ throw ValidationError("Invalid input.")
 Error: Invalid input.
 ```
 
-
+### ExitCode
 また、`ExitCode`に定義された静的プロパティをthrowすることで、その時点でコマンドを終了させることができます。
 
 中でも`ExitCode.validationFailure`はthrowすることで、プラットフォームごとに適した終了コードを投げるように実装されています。
