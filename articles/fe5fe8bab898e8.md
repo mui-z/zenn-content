@@ -249,8 +249,8 @@ print(echo.text)
 
 
 ## 終わりに
-Swiftで手軽にCLIコマンドツールを作れそうなことが伝わりましたでしょうか？？？
-できそう！と感じていただけたならば幸いです！
+Swiftで手軽にCLIコマンドツールを作れそうな気がしてきましたか？
+作れそう！と感じていただけたならば幸いです！
 
 今回の例ではシンプルなものばかりでしたが、ゴリゴリのCLIコマンドを作るためのオプションも備えています...！
 このdockerの引数の取り方を真似たいとか、排他的にフラグを処理したいとか、よくある挙動は実装できるようになっているので、[公式Document](https://swiftpackageindex.com/apple/swift-argument-parser/main/documentation/argumentparser)を見てみると良さそうです！
