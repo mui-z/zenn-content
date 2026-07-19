@@ -19,11 +19,12 @@ https://github.com/apple/swift-argument-parser
 ## swift-argument-parserとは
 
 `swift-argument-paser`は前述したようにAppleが開発、公開しているSwiftでCLIツールを作成できるライブラリです。
+
 名前からして引数のパースだけできると思っていたのですが、そういうわけではなくCLIツールを作るための機能が一通り揃っており、これ一つでCLIツールを作成することできます！
 
 非常にシンプルな例ですが引数として渡された文字列を返すだけであれば、以下のコードだけでできてしまいます！ (ヘルプコマンドもバリデーションも自動で実装される...！！)
 
-ソース
+**ソース**
 ```swift
 import ArgumentParser
 
@@ -38,13 +39,13 @@ struct Echo: ParsableCommand {
 }
 ```
 
-実行
+**実行**
 ```bash
 $ swift run echo "Hello, World!"
 Hello, World! 
 ```
 
-自動生成されるヘルプコマンド
+**自動生成されるヘルプコマンド**
 ```bash
 $ swift run echo -h
 
@@ -172,6 +173,7 @@ https://apple.github.io/swift-argument-parser/documentation/argumentparser/insta
 ## エラー、終了コードで終了する
 
 `swift-argument-parser`では `ValidationError`という`Error型`の拡張が定義されています。
+
 エラーでコマンドを終了させたい場合に、以下のようにthrowすることで、終了させることができます。
 
 ```swift
@@ -184,6 +186,7 @@ Error: Invalid input.
 
 
 また、`ExitCode`に定義された静的プロパティをthrowすることで、その時点でコマンドを終了させることができます。
+
 中でも`ExitCode.validationFailure`はthrowすることで、プラットフォームごとに適した終了コードを投げるように実装されています。
 （[ソース](https://github.com/apple/swift-argument-parser/blob/6a52f3251125d74daf04fcbd5e6f08a75d074382/Sources/ArgumentParser/Utilities/Platform.swift#L143-L164)を見る限りは、Windows, WASI, それ以外で振り分けていそう)
 
@@ -200,7 +203,7 @@ throw ExitCode(5)
 ```
 
 また、`CleanExit`というものもあり、エラー扱いではなくかつメッセージを表示して終了させたい。という場面で扱えます。
-ヘルプを表示して抜けたい、バージョンを表示したいなどの際に適用することができます。
+ヘルプを表示して抜けたい、バージョンを表示したいなどの際に活用できます。
 ```swift
 // 任意のParsableCommandのヘルプを表示して正常終了
 throw CleanExit.helpRequest(Echo.self)
@@ -212,6 +215,7 @@ throw CleanExit.message("Everything looks good!")
 
 ## Asyncを扱う
 ファイルの読み書きやAPI通信などを伴う場合は、`async/await`を用いて非同期処理をしたくなることもあると思います。
+
 その場合は`mutating func run() async throws`と定義することで対応できます。
 
 ```swift
@@ -226,6 +230,7 @@ mutating func run() async throws {
 ## スクリプトライクに書く
 
 `ParsableArguments.parseOrExit()`を使うことで、スクリプトライクに書くこともできます。
+
 ペライチで済むような小さな処理だけさせる場合は、こちらで書いてしまった方が楽そうです。
 
 ```swift
