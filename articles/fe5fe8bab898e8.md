@@ -1,0 +1,255 @@
+---
+title: "swift-argument-parserでCLIコマンドを作ってみよう！"
+emoji: "🍎"
+type: "tech" # tech: 技術記事 / idea: アイデア
+topics: ["swift", "cli", "swift-argument-parser"]
+published: false
+---
+
+## はじめに
+
+みなさんはSwiftでCLIコマンドツールを作りたいと思ったとき、どうしていますか？  
+以前私は[jakeheis/SwiftCLI](https://github.com/jakeheis/SwiftCLI)を組み込んで[テンプレリポジトリ](https://github.com/mui-z/SwiftCLIToolTemplate)を作成、利用してしていたのですが、
+今回Appleが公開している[swift-argument-parser](https://github.com/apple/swift-argument-parser)を知り、もっと手軽に、そしてApple純正のライブラリのみでCLIツールが作成できることを知ったため、ここで共有しようと思います！
+
+https://github.com/apple/swift-argument-parser
+
+## swift-argument-parserとは
+
+`swift-argument-paser`は前述したようにAppleが開発、公開しているSwiftでCLIツールを作成できるライブラリです。
+名前からして引数のパースだけできると思っていたのですが、そういうわけではなくCLIツールを作るための機能が一通り揃っており、これ一つでCLIツールを作成することできます！
+
+非常にシンプルな例ですが引数として渡された文字列を返すだけであれば、以下のコードだけでできてしまいます！ (ヘルプコマンドもバリデーションも自動で実装される...！！)
+
+```swift
+import ArgumentParser
+
+@main
+struct Echo: ParsableCommand {
+    @Argument(help: "Echo text.")
+    var text: String
+
+    mutating func run() throws {
+        print(text)
+    }
+}
+```
+
+```bash
+$ swift run echo "Hello, World!"
+Hello, World! 
+```
+
+```bash
+$ swift run echo -h
+
+USAGE: echo <text>
+
+ARGUMENTS:
+  <text>                  Echo text.
+
+OPTIONS:                  
+  -h, --help              Show help information.
+```
+
+READMEにあるように、`Swift Package Manager`や`Swift Format`なども`swift-argument-parser`が利用されているようです！
+
+
+## 準備
+
+まず最初にSwift Packageの作成をします。
+`swift-argument-paser`でCLIツールを作成する場合は、以下のコマンドで自動的に`Package.swift`に`swift-arguemnt-parser`が追加された状態で作成することができます。
+
+```bash
+swift package init --type tool
+```
+
+```swift
+// swift-tools-version: 6.4
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+
+let package = Package(
+    name: "echo",
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
+    ],
+    targets: [
+        // Targets are the basic building blocks of a package, defining a module or a test suite.
+        // Targets can depend on other targets in this package and products from dependencies.
+        .executableTarget(
+            name: "echo",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("ApproachableConcurrency"),
+            ],
+        ),
+        .testTarget(
+            name: "echoTests",
+            dependencies: ["echo"],
+            swiftSettings: [
+                .enableUpcomingFeature("ApproachableConcurrency"),
+            ],
+        ),
+    ]
+)
+```
+
+## Hello World!
+この時点でコマンドが実行できる状態になっているので、以下で実行してみましょう！
+
+```bash
+$ swift run echo
+Hello, world!
+```
+
+## フラグ、オプション
+
+引数として受け取るには主に三つのproperty wrapperがあります。
+
+※ apple/swift-argument-parser README引用、加筆
+```swift
+ 
+// Booleanで引数を受け取る
+@Flag(help: "Include a counter with each repetition.")
+var includeCounter = false
+
+// 名前付きで引数を受け取る
+@Option(name: .shortAndLong, help: "How many times to repeat 'phrase'.")
+var count: Int? = nil
+
+// 名前なしで引数を受け取る
+@Argument(help: "The phrase to repeat.")
+var phrase: String
+```
+
+上記の定義より、実際に叩くと以下のようになります
+```
+$ repeat hello --count 3
+```
+
+初期値を渡したりOptionalにしたりすることで、引数の振る舞いを変えることができます。
+
+
+`@Argument`, `@Option`においては、配列で引数を受け取ることもできます。
+```swift
+@Argument()
+var foo: [String]
+
+@Option(name: .customLong("char"))
+var chars: [Character]
+```
+
+
+### Completion
+先ほど述べたproperty wrapperには補完をサポートする機能があり、たとえばファイル名の指定やディレクトリ名、特定のオプションを自動で補完できるようになります。
+
+
+```swift
+// 他にも`.custom(), .file(), .list(), .shellCommand()`などが定義されている
+// https://swiftpackageindex.com/apple/swift-argument-parser/main/documentation/argumentparser/completionkind
+@Argument(.directory) 
+var target: String
+```
+
+実際にこれらを使う場合はコマンドの引数に `--generate-completion-script [zsh|bash|fish]`をつけてスクリプトを登録する必要があります。
+zsh, bashにおいては、事前準備等が必要な場合があります。詳しくは以下をご覧ください。
+
+https://apple.github.io/swift-argument-parser/documentation/argumentparser/installingcompletionscripts/
+
+
+## エラー、終了コード
+
+`swift-argument-parser`では `ValidationError`という`Error型`の拡張が定義されています。
+エラーでコマンドを終了させたい場合に、以下のようにthrowすることで、終了させることができます。
+
+```swift
+throw ValdiationError("Invalid input.")
+```
+
+```bash
+Error: Invalid input.
+```
+
+
+また、`ExitCode`の拡張をthrowすることで、その時点でコマンドを終了させることができます。
+中でも`ExitCode.validationFailure`はthrowすることで、プラットフォームごとに適した終了コードを投げるように実装されています。
+（[ソース](https://github.com/apple/swift-argument-parser/blob/6a52f3251125d74daf04fcbd5e6f08a75d074382/Sources/ArgumentParser/Utilities/Platform.swift#L143-L164)を見る限りは、Windows, WASI, それ以外で振り分けていそう)
+
+```swift
+throw ExitCode.success
+
+throw ExitCode.failure
+
+throw ExitCode.validationFailure
+
+
+// 任意のコードで終わらせたいとき
+throw ExitCode(5)
+```
+
+また、`CleanExit`というものもあり、エラー扱いではなくかつメッセージを表示して終了させたい。という場面で扱えるようです。
+ヘルプを表示して抜けたい、バージョンを表示したいなど場面で扱うことができるようです。
+```swift
+// 任意のParsableCommandのヘルプを表示して正常終了
+throw CleanExit.helpRequest(Echo.self)
+
+// 任意の文字列を表示して正常終了
+throw CleanExit.message("Everything looks good!")
+```
+
+
+## Asyncを扱う
+ファイルの読み書きやAPI通信などを伴う場合は、`async/await`を用いて非同期処理をしたくなることもあると思います。
+その場合は`mutating fun run() async throws`と定義することで対応できます。
+
+```swift
+
+mutating func run() async thorows {
+    let data = await hogeAsyncFunc()
+    print(data.rawValue)
+}
+```
+
+
+## スクリプトライクに書く
+
+`ParsableArguments.parseOrExit()`を使うことで、スクリプトライクに書くこともできます。
+ペライチで済むような小さな処理だけさせる場合は、こちらで書いてしまった方が楽そうです。
+
+```swift
+// Echo.swift
+
+import ArgumentParser
+
+// @mainを外すのを忘れずに...！
+struct Echo: ParsableCommand {
+    @Argument(help: "Echo text.")
+    var text: String
+
+    mutating func run() throws {
+        print(text)
+    }
+}
+
+let echo = Echo.parseOrExit()
+print(echo.text)
+```
+
+
+## 終わりに
+Swiftで手軽にCLIコマンドツールを作れることが伝わりましたでしょうか？
+
+今回の例ではシンプルなものばかりでしたが、ゴリゴリのCLIコマンドを作るためのオプションも備えています...！（引数の受け取り方を変えて楽にラッパーコマンドを作ることができるだったり、サブコマンドを作る方法だったり、、、他にもたくさんあります...！）
+
+また最後に宣伝ですが、`swift-argument-parser`を利用して、コマンドからQRコードをサクッと生成できるツールを作成してみました！　よければ使ってみてください！
+
+https://github.com/mui-z/rr
+
+
+## 参考文献
+- [swift-argument-parser - github/apple](https://github.com/apple/swift-argument-parser)
+- [Swift Argument Parser を使うツールの作成時は `swift package init --type tool` を使う - taji-taji’s blog](https://taji-taji.hatenablog.com/entry/2025/02/02/220837)
