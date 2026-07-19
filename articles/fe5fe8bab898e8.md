@@ -241,10 +241,6 @@ import ArgumentParser
 struct Echo: ParsableCommand {
     @Argument(help: "Echo text.")
     var text: String
-
-    mutating func run() throws {
-        print(text)
-    }
 }
 
 let echo = Echo.parseOrExit()
