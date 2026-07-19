@@ -10,7 +10,7 @@ published: false
 
 みなさんはSwiftでCLIコマンドツールを作りたいと思ったとき、どうしていますか？  
 
-私の場合は、[jakeheis/SwiftCLI](https://github.com/jakeheis/SwiftCLI)を組み込んで[テンプレリポジトリ](https://github.com/mui-z/SwiftCLIToolTemplate)を作成、利用していました。
+私の場合は、[jakeheis/SwiftCLI](https://github.com/jakeheis/SwiftCLI)を組み込んで[テンプレリポジトリ](https://github.com/mui-z/SwiftCLIToolTemplate)を作成して利用していました。
 
 しかしAppleが公開している[swift-argument-parser](https://github.com/apple/swift-argument-parser)を見つけ、Apple純正のライブラリのみで手軽にCLIツールが作成できることを知ったため、ここで共有しようと思います！
 
